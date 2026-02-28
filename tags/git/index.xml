@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Git on Ocean's Blog</title><link>https://ocean-sudo.github.io/tags/git/</link><description>Recent content in Git on Ocean's Blog</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Wed, 25 Feb 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://ocean-sudo.github.io/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>用 Bare Git 管理 Dotfiles（精简实战版）</title><link>https://ocean-sudo.github.io/p/manage-dotfiles-with-bare-git/</link><pubDate>Wed, 25 Feb 2026 00:00:00 +0000</pubDate><guid>https://ocean-sudo.github.io/p/manage-dotfiles-with-bare-git/</guid><description>&lt;img src="https://ocean-sudo.github.io/p/manage-dotfiles-with-bare-git/cover.jpg" alt="Featured image of post 用 Bare Git 管理 Dotfiles（精简实战版）" /&gt;&lt;p&gt;这篇是基于 Atlassian 教程 &lt;strong&gt;How to Store Dotfiles - A Bare Git Repository&lt;/strong&gt; 的精简实践版。想深入理解细节，建议阅读原文。&lt;br&gt;
+原文链接：https://www.atlassian.com/git/tutorials/dotfiles&lt;/p&gt;
+&lt;h2 id="bare-git-是什么"&gt;Bare Git 是什么
+&lt;/h2&gt;&lt;p&gt;&lt;code&gt;bare git&lt;/code&gt; 可以简单理解为：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;只有 Git 元数据（类似 &lt;code&gt;.git&lt;/code&gt; 目录内容）&lt;/li&gt;
+&lt;li&gt;没有实际工作区文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;用它管理 dotfiles 时，本质上是把：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Git 数据库存放在一个独立目录（例如 &lt;code&gt;~/.cfg&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;实际配置文件继续放在 &lt;code&gt;$HOME&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这样就实现了「Git 仓库」与「配置文件本体」分离。&lt;/p&gt;
+&lt;h2 id="bash-下四步完成初始化"&gt;Bash 下四步完成初始化
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 1) 在 $HOME 下创建名为 .cfg 的裸仓库&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git init --bare &lt;span class="nv"&gt;$HOME&lt;/span&gt;/.cfg
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 2) 创建 config 别名：&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# --git-dir 指向 Git 数据库&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# --work-tree 指向真实工作区（$HOME）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;alias&lt;/span&gt; &lt;span class="nv"&gt;config&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 3) 只对该仓库生效：不显示未跟踪文件&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 否则整个 $HOME 都会显示为未跟踪&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;config config --local status.showUntrackedFiles no
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 4) 写入 .bashrc，确保每次 shell 启动都可用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;alias config=&amp;#39;/usr/bin/git --git-dir=&lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;&lt;span class="s2"&gt;/.cfg/ --work-tree=&lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;&lt;span class="s2"&gt;&amp;#39;&amp;#34;&lt;/span&gt; &amp;gt;&amp;gt; &lt;span class="nv"&gt;$HOME&lt;/span&gt;/.bashrc
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;如果你使用 fish，请将 alias 改为对应的 function 写法。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="之后怎么用"&gt;之后怎么用
+&lt;/h2&gt;&lt;p&gt;从这一步开始，把 &lt;code&gt;config&lt;/code&gt; 当作 &lt;code&gt;git&lt;/code&gt; 来使用：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 示例：跟踪一个配置文件并提交&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;config add ~/.bashrc
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;config commit -m &lt;span class="s2"&gt;&amp;#34;chore(dotfiles): add config alias for bare repo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;你可以继续像普通 Git 仓库一样使用：&lt;code&gt;config status&lt;/code&gt;、&lt;code&gt;config log&lt;/code&gt;、&lt;code&gt;config push&lt;/code&gt;。&lt;/p&gt;
+&lt;h2 id="这样做的价值"&gt;这样做的价值
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;不再需要「一个软件一个仓库」分散维护（kitty、fish、niri&amp;hellip;）&lt;/li&gt;
+&lt;li&gt;多机同步更统一，可按分支区分设备或场景&lt;/li&gt;
+&lt;li&gt;主动 &lt;code&gt;add&lt;/code&gt; 文件，避免 &lt;code&gt;add .&lt;/code&gt; 带来的误跟踪&lt;/li&gt;
+&lt;li&gt;缓存、自动生成文件、插件目录等内容不易误提交&lt;/li&gt;
+&lt;li&gt;降低对复杂 &lt;code&gt;.gitignore&lt;/code&gt; 的依赖&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="一句话总结"&gt;一句话总结
+&lt;/h2&gt;&lt;p&gt;核心思想只有一句：&lt;strong&gt;用一个裸 Git 仓库，以文件粒度管理你手动选择的 &lt;code&gt;$HOME&lt;/code&gt; 配置文件。&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>
